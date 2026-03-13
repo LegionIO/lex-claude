@@ -9,17 +9,17 @@ module Legion
         module Models
           extend Legion::Extensions::Claude::Helpers::Client
 
-          def list(api_key:, limit: 20, before_id: nil, after_id: nil, **opts)
+          def list(api_key:, limit: 20, before_id: nil, after_id: nil, **)
             params = { limit: limit }
             params[:before_id] = before_id if before_id
             params[:after_id] = after_id if after_id
 
-            response = client(api_key: api_key, **opts).get('/v1/models', params)
+            response = client(api_key: api_key, **).get('/v1/models', params)
             { result: response.body, status: response.status }
           end
 
-          def retrieve(api_key:, model_id:, **opts)
-            response = client(api_key: api_key, **opts).get("/v1/models/#{model_id}")
+          def retrieve(api_key:, model_id:, **)
+            response = client(api_key: api_key, **).get("/v1/models/#{model_id}")
             { result: response.body, status: response.status }
           end
 

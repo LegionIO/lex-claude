@@ -11,6 +11,8 @@ module Legion
           DEFAULT_HOST = 'https://api.anthropic.com'
           API_VERSION = '2023-06-01'
 
+          module_function
+
           def client(api_key:, host: DEFAULT_HOST, **_opts)
             Faraday.new(url: host) do |conn|
               conn.request :json

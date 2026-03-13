@@ -9,9 +9,9 @@ module Legion
         module Messages
           extend Legion::Extensions::Claude::Helpers::Client
 
-          def create(api_key:, model:, messages:, max_tokens: 1024, system: nil, temperature: nil,
+          def create(api_key:, model:, messages:, max_tokens: 1024, system: nil, temperature: nil, # rubocop:disable Metrics/ParameterLists
                      top_p: nil, top_k: nil, stop_sequences: nil, metadata: nil, tools: nil,
-                     tool_choice: nil, stream: false, **opts)
+                     tool_choice: nil, stream: false, **)
             body = {
               model:      model,
               messages:   messages,
@@ -27,16 +27,16 @@ module Legion
             body[:tools] = tools if tools
             body[:tool_choice] = tool_choice if tool_choice
 
-            response = client(api_key: api_key, **opts).post('/v1/messages', body)
+            response = client(api_key: api_key, **).post('/v1/messages', body)
             { result: response.body, status: response.status }
           end
 
-          def count_tokens(api_key:, model:, messages:, system: nil, tools: nil, **opts)
+          def count_tokens(api_key:, model:, messages:, system: nil, tools: nil, **) # rubocop:disable Metrics/ParameterLists
             body = { model: model, messages: messages }
             body[:system] = system if system
             body[:tools] = tools if tools
 
-            response = client(api_key: api_key, **opts).post('/v1/messages/count_tokens', body)
+            response = client(api_key: api_key, **).post('/v1/messages/count_tokens', body)
             { result: response.body, status: response.status }
           end
 
