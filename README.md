@@ -25,6 +25,16 @@ gem install lex-claude
 - `cancel_batch` - Cancel an in-progress batch
 - `batch_results` - Retrieve results for a completed batch
 
+## Configuration
+
+Set your API key in your LegionIO settings or pass it directly:
+
+```yaml
+# config/settings.yml
+claude:
+  api_key: "sk-ant-..."
+```
+
 ## Standalone Usage
 
 ```ruby
@@ -50,6 +60,16 @@ tokens = client.count_tokens(
   messages: [{ role: 'user', content: 'How many tokens is this?' }]
 )
 puts tokens[:result]['input_tokens']
+
+# Create an async batch
+batch = client.create_batch(
+  requests: [
+    { custom_id: 'req-1', params: { model: 'claude-sonnet-4-20250514',
+                                    messages: [{ role: 'user', content: 'Hello' }],
+                                    max_tokens: 100 } }
+  ]
+)
+puts batch[:result]['id']
 ```
 
 ## Requirements

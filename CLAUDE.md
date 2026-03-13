@@ -1,7 +1,7 @@
 # lex-claude: Claude Anthropic Integration for LegionIO
 
 **Repository Level 3 Documentation**
-- **Category**: `/Users/miverso2/rubymine/legion/extensions/CLAUDE.md`
+- **Category**: `/Users/miverso2/rubymine/legion/extensions-ai/CLAUDE.md`
 
 ## Purpose
 
@@ -15,13 +15,15 @@ Legion Extension that connects LegionIO to the Claude Anthropic API. Provides ru
 ```
 Legion::Extensions::Claude
 ├── Runners/
-│   ├── Messages           # Create messages, count tokens
-│   ├── Models             # List and retrieve models
-│   └── Batches            # Create, list, retrieve, cancel batches
+│   ├── Messages           # Create messages (create), count tokens (count_tokens)
+│   ├── Models             # List (list) and retrieve (retrieve) models
+│   └── Batches            # create_batch, list_batches, retrieve_batch, cancel_batch, batch_results
 ├── Helpers/
-│   └── Client             # Faraday-based Anthropic API client
+│   └── Client             # Faraday-based Anthropic API client (module, factory method)
 └── Client                 # Standalone client class (includes all runners)
 ```
+
+`Helpers::Client` is a **module** with a `client(api_key:, ...)` factory method. It sets `x-api-key` and `anthropic-version` headers. The `API_VERSION` constant is `'2023-06-01'` and `DEFAULT_HOST` is `'https://api.anthropic.com'`. All runner modules `extend` it. `Client` (class) provides a standalone instantiable wrapper that configures a persistent `@config` and delegates `client(...)` calls through the helpers module.
 
 ## Dependencies
 
