@@ -1,7 +1,8 @@
 # lex-claude: Claude Anthropic Integration for LegionIO
 
 **Repository Level 3 Documentation**
-- **Category**: `/Users/miverso2/rubymine/legion/extensions-ai/CLAUDE.md`
+- **Parent**: `/Users/miverso2/rubymine/legion/extensions-ai/CLAUDE.md`
+- **Grandparent**: `/Users/miverso2/rubymine/legion/CLAUDE.md`
 
 ## Purpose
 
@@ -9,6 +10,7 @@ Legion Extension that connects LegionIO to the Claude Anthropic API. Provides ru
 
 **GitHub**: https://github.com/LegionIO/lex-claude
 **License**: MIT
+**Version**: 0.1.0
 
 ## Architecture
 

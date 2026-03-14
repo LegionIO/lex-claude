@@ -29,10 +29,12 @@ gem install lex-claude
 
 Set your API key in your LegionIO settings or pass it directly:
 
-```yaml
-# config/settings.yml
-claude:
-  api_key: "sk-ant-..."
+```json
+{
+  "claude": {
+    "api_key": "sk-ant-..."
+  }
+}
 ```
 
 ## Standalone Usage
@@ -44,7 +46,7 @@ client = Legion::Extensions::Claude::Client.new(api_key: ENV['ANTHROPIC_API_KEY'
 
 # Create a message
 result = client.create(
-  model: 'claude-sonnet-4-20250514',
+  model: 'claude-sonnet-4-5',
   messages: [{ role: 'user', content: 'Hello, Claude!' }],
   max_tokens: 1024
 )
@@ -56,7 +58,7 @@ puts models[:result]['data'].map { |m| m['id'] }
 
 # Count tokens
 tokens = client.count_tokens(
-  model: 'claude-sonnet-4-20250514',
+  model: 'claude-sonnet-4-5',
   messages: [{ role: 'user', content: 'How many tokens is this?' }]
 )
 puts tokens[:result]['input_tokens']
@@ -64,7 +66,7 @@ puts tokens[:result]['input_tokens']
 # Create an async batch
 batch = client.create_batch(
   requests: [
-    { custom_id: 'req-1', params: { model: 'claude-sonnet-4-20250514',
+    { custom_id: 'req-1', params: { model: 'claude-sonnet-4-5',
                                     messages: [{ role: 'user', content: 'Hello' }],
                                     max_tokens: 100 } }
   ]
