@@ -8,6 +8,12 @@ Claude Anthropic API integration for [LegionIO](https://github.com/LegionIO/Legi
 gem install lex-claude
 ```
 
+Or add to your Gemfile:
+
+```ruby
+gem 'lex-claude'
+```
+
 ## Functions
 
 ### Messages
@@ -27,7 +33,7 @@ gem install lex-claude
 
 ## Configuration
 
-Set your API key in your LegionIO settings or pass it directly:
+Set your API key in your LegionIO settings:
 
 ```json
 {
@@ -46,7 +52,7 @@ client = Legion::Extensions::Claude::Client.new(api_key: ENV['ANTHROPIC_API_KEY'
 
 # Create a message
 result = client.create(
-  model: 'claude-sonnet-4-5',
+  model: 'claude-opus-4-6',
   messages: [{ role: 'user', content: 'Hello, Claude!' }],
   max_tokens: 1024
 )
@@ -58,7 +64,7 @@ puts models[:result]['data'].map { |m| m['id'] }
 
 # Count tokens
 tokens = client.count_tokens(
-  model: 'claude-sonnet-4-5',
+  model: 'claude-opus-4-6',
   messages: [{ role: 'user', content: 'How many tokens is this?' }]
 )
 puts tokens[:result]['input_tokens']
@@ -66,13 +72,18 @@ puts tokens[:result]['input_tokens']
 # Create an async batch
 batch = client.create_batch(
   requests: [
-    { custom_id: 'req-1', params: { model: 'claude-sonnet-4-5',
+    { custom_id: 'req-1', params: { model: 'claude-opus-4-6',
                                     messages: [{ role: 'user', content: 'Hello' }],
                                     max_tokens: 100 } }
   ]
 )
 puts batch[:result]['id']
 ```
+
+## Dependencies
+
+- `faraday` >= 2.0 - HTTP client
+- `multi_json` - JSON parser abstraction
 
 ## Requirements
 
