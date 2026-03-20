@@ -32,7 +32,7 @@ Legion::Extensions::Claude
 
 ## Key Design Decisions
 
-- Runners use `extend Helpers::Client` so `client(...)` is available as a module-function without instantiation.
+- `Helpers::Client` uses `module_function`, making `client(...)` callable as both a module-level method and as an instance method when mixed in. Runners use `extend Helpers::Client` to get `client(...)` as a module-level method.
 - `Client` class uses `include` (not `extend`) so runner methods become instance methods on the client object.
 - The Batches runner uses JSON-only payloads — no multipart dependency.
 - `include Legion::Extensions::Helpers::Lex` is guarded: only included when `lex-lex` is loaded.
