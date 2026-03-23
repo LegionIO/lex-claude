@@ -1,6 +1,10 @@
 # lex-claude
 
-Claude Anthropic API integration for [LegionIO](https://github.com/LegionIO/LegionIO). Provides runners for creating messages, listing models, counting tokens, and managing message batches.
+Claude Anthropic API integration for LegionIO. Provides runners for creating messages, listing models, counting tokens, and managing message batches.
+
+## Purpose
+
+Wraps the Anthropic Claude REST API as named runners consumable by any LegionIO task chain. Use this extension when you need direct access to the full Anthropic API surface (including async Batches) within the LEX runner/actor lifecycle. For simple chat/embed workflows, consider `legion-llm` instead.
 
 ## Installation
 
@@ -90,6 +94,12 @@ puts batch[:result]['id']
 - Ruby >= 3.4
 - [LegionIO](https://github.com/LegionIO/LegionIO) framework (optional for standalone client usage)
 - Anthropic API key
+
+## Related
+
+- `lex-bedrock` — Access Claude models via AWS Bedrock instead of Anthropic directly
+- `legion-llm` — High-level LLM interface including Anthropic via ruby_llm
+- `extensions-ai/CLAUDE.md` — Architecture patterns shared across all AI extensions
 
 ## License
 
