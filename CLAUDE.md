@@ -10,7 +10,7 @@ Legion Extension that connects LegionIO to the Claude Anthropic API. Provides ru
 
 **GitHub**: https://github.com/LegionIO/lex-claude
 **License**: MIT
-**Version**: 0.1.1
+**Version**: 0.1.2
 **Specs**: 18 examples
 
 ## Architecture
