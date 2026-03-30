@@ -31,7 +31,7 @@ module Legion
             { result: response.body, status: response.status }
           end
 
-          def count_tokens(api_key:, model:, messages:, system: nil, tools: nil, **) # rubocop:disable Metrics/ParameterLists
+          def count_tokens(api_key:, model:, messages:, system: nil, tools: nil, **)
             body = { model: model, messages: messages }
             body[:system] = system if system
             body[:tools] = tools if tools
@@ -40,8 +40,8 @@ module Legion
             { result: response.body, status: response.status }
           end
 
-          include Legion::Extensions::Helpers::Lex if Legion::Extensions.const_defined?(:Helpers) &&
-                                                      Legion::Extensions::Helpers.const_defined?(:Lex)
+          include Legion::Extensions::Helpers::Lex if Legion::Extensions.const_defined?(:Helpers, false) &&
+                                                      Legion::Extensions::Helpers.const_defined?(:Lex, false)
         end
       end
     end
