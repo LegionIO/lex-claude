@@ -22,7 +22,7 @@ RSpec.describe Legion::Extensions::Claude::Runners::Messages do
                       'role'    => 'assistant',
                       'content' => [{ 'type' => 'text', 'text' => 'Hello!' }],
                       'model'   => model
-                    }, status: 200)
+                    }, status: 200, headers: {})
   end
 
   let(:faraday_conn) { instance_double(Faraday::Connection) }
@@ -66,7 +66,7 @@ RSpec.describe Legion::Extensions::Claude::Runners::Messages do
 
   describe '#count_tokens' do
     let(:token_response) do
-      instance_double(Faraday::Response, body: { 'input_tokens' => 42 }, status: 200)
+      instance_double(Faraday::Response, body: { 'input_tokens' => 42 }, status: 200, headers: {})
     end
 
     it 'sends a token counting request' do
@@ -76,6 +76,27 @@ RSpec.describe Legion::Extensions::Claude::Runners::Messages do
 
       expect(result[:status]).to eq(200)
       expect(result[:result]['input_tokens']).to eq(42)
+    end
+  end
+
+  describe 'error handling' do
+    let(:error_response) do
+      instance_double(Faraday::Response,
+                      status:  429,
+                      body:    { 'error' => { 'type' => 'rate_limit_error', 'message' => 'Too many requests' } },
+                      headers: {})
+    end
+
+    it 'raises RateLimitError on 429 from create' do
+      allow(faraday_conn).to receive(:post).with('/v1/messages', anything).and_return(error_response)
+      expect { instance.create(api_key: api_key, model: model, messages: messages) }
+        .to raise_error(Legion::Extensions::Claude::Helpers::Errors::RateLimitError)
+    end
+
+    it 'raises RateLimitError on 429 from count_tokens' do
+      allow(faraday_conn).to receive(:post).with('/v1/messages/count_tokens', anything).and_return(error_response)
+      expect { instance.count_tokens(api_key: api_key, model: model, messages: messages) }
+        .to raise_error(Legion::Extensions::Claude::Helpers::Errors::RateLimitError)
     end
   end
 end

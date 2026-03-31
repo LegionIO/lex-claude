@@ -27,7 +27,7 @@ RSpec.describe Legion::Extensions::Claude::Runners::Models do
                           { 'id' => 'claude-haiku-4-20250414', 'type' => 'model' }
                         ],
                         'has_more' => false
-                      }, status: 200)
+                      }, status: 200, headers: {})
     end
 
     it 'lists available models' do
@@ -54,7 +54,7 @@ RSpec.describe Legion::Extensions::Claude::Runners::Models do
                         'id'           => 'claude-sonnet-4-20250514',
                         'type'         => 'model',
                         'display_name' => 'Claude Sonnet 4'
-                      }, status: 200)
+                      }, status: 200, headers: {})
     end
 
     it 'retrieves a specific model' do
