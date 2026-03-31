@@ -28,6 +28,11 @@
 - `Messages#count_tokens` now accepts `thinking:`, `cache_system:` keywords
 - Added `rubocop-legion` for consistent linting
 
+## [0.1.3] - 2026-03-30
+
+### Changed
+- update to rubocop-legion 0.1.7, resolve all offenses
+
 ## [0.1.2] - 2026-03-22
 
 ### Changed
