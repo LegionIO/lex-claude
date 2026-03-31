@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.3.2] - 2026-03-31
+
+### Added
+- Specs for `context_management` beta support in `Runners::Messages#create` and `#create_stream`: body inclusion, beta header auto-injection (`context-management-2025-06-27`), and nil omission
+
 ## [0.3.1] - 2026-03-31
 
 ### Added

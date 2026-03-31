@@ -158,6 +158,65 @@ RSpec.describe Legion::Extensions::Claude::Runners::Messages do
 
       instance.create(api_key: api_key, model: model, messages: messages, metadata: meta)
     end
+
+    context 'with context_management' do
+      let(:context_management_payload) do
+        {
+          edits: [
+            {
+              type:           'clear_tool_uses_20250919',
+              trigger:        { input_tokens: 180_000 },
+              keep:           { tail_tokens: 40_000 },
+              clear_at_least: 140_000,
+              tool_config:    {
+                clear_tool_inputs: %w[Read Bash Grep Glob WebFetch],
+                exclude_tools:     %w[Write Edit]
+              }
+            },
+            {
+              type: 'clear_thinking_20251015'
+            }
+          ]
+        }
+      end
+
+      it 'sends context_management in the request body' do
+        allow(faraday_conn).to receive(:post)
+          .with('/v1/messages', hash_including(context_management: context_management_payload))
+          .and_return(success_response)
+
+        result = instance.create(api_key: api_key, model: model, messages: messages,
+                                 context_management: context_management_payload)
+
+        expect(result[:status]).to eq(200)
+      end
+
+      it 'auto-injects the context-management-2025-06-27 beta header' do
+        captured_betas = nil
+        allow(Faraday).to receive(:new) do |**_kwargs, &blk|
+          headers = {}
+          conn = instance_double(Faraday::Connection, headers: headers, request: nil, response: nil)
+          allow(conn).to receive(:post).and_return(success_response)
+          blk&.call(conn)
+          captured_betas = headers['anthropic-beta']
+          conn
+        end
+
+        instance.create(api_key: api_key, model: model, messages: messages,
+                        context_management: context_management_payload)
+
+        expect(captured_betas).to include('context-management-2025-06-27')
+      end
+
+      it 'omits context_management from body when nil' do
+        allow(faraday_conn).to receive(:post) do |_path, body|
+          expect(body).not_to have_key(:context_management)
+          success_response
+        end
+
+        instance.create(api_key: api_key, model: model, messages: messages)
+      end
+    end
   end
 
   describe '#create_stream' do
@@ -216,6 +275,18 @@ RSpec.describe Legion::Extensions::Claude::Runners::Messages do
       end
       expect(deltas.length).to eq(1)
       expect(deltas.first[:data]['delta']['text']).to eq('Hi!')
+    end
+
+    it 'includes context_management in the body when provided' do
+      cm = { edits: [{ type: 'clear_thinking_20251015' }] }
+      allow(faraday_conn).to receive(:post) do |_path, body|
+        parsed = MultiJson.load(body, symbolize_keys: true)
+        expect(parsed[:context_management]).to eq(cm)
+        stream_response
+      end
+
+      instance.create_stream(api_key: api_key, model: model, messages: messages,
+                             context_management: cm)
     end
   end
 
