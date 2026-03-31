@@ -45,22 +45,38 @@ module Legion
           end
 
           def collect_usage(events)
-            input_tokens  = 0
-            output_tokens = 0
+            totals = Hash.new(0)
 
             events.each do |e|
               case e[:event]
               when 'message_start'
-                usage = e[:data].dig('message', 'usage') || {}
-                input_tokens  += usage.fetch('input_tokens', 0).to_i
-                output_tokens += usage.fetch('output_tokens', 0).to_i
+                merge_usage(totals, e[:data].dig('message', 'usage'))
               when 'message_delta'
-                usage = e[:data].fetch('usage', {})
-                output_tokens += usage.fetch('output_tokens', 0).to_i
+                merge_usage(totals, e[:data]['usage'])
               end
             end
 
-            { input_tokens: input_tokens, output_tokens: output_tokens }
+            {
+              input_tokens:              totals['input_tokens'],
+              output_tokens:             totals['output_tokens'],
+              cache_read_tokens:         totals['cache_read_input_tokens'],
+              cache_write_tokens:        totals['cache_creation_input_tokens'],
+              cache_ephemeral_1h_tokens: totals['ephemeral_1h_input_tokens'],
+              cache_ephemeral_5m_tokens: totals['ephemeral_5m_input_tokens'],
+              cache_deleted_tokens:      totals['cache_deleted_input_tokens']
+            }
+          end
+
+          def merge_usage(totals, usage)
+            return unless usage.is_a?(Hash)
+
+            usage.each do |key, val|
+              if val.is_a?(Hash)
+                val.each { |k, v| totals[k.to_s] += v.to_i }
+              else
+                totals[key.to_s] += val.to_i
+              end
+            end
           end
         end
       end

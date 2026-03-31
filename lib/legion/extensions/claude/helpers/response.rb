@@ -47,12 +47,22 @@ module Legion
 
           def parse_usage(body)
             usage = body.is_a?(Hash) ? (body[:usage] || body['usage'] || {}) : {} # rubocop:disable Legion/Framework/ApiStringKeys
+            cache_creation = usage.is_a?(Hash) ? (usage[:cache_creation] || usage['cache_creation'] || {}) : {}
             {
-              input_tokens:       (usage[:input_tokens] || usage['input_tokens'] || 0).to_i,
-              output_tokens:      (usage[:output_tokens] || usage['output_tokens'] || 0).to_i,
-              cache_read_tokens:  (usage[:cache_read_input_tokens] || usage['cache_read_input_tokens'] || 0).to_i,
-              cache_write_tokens: (usage[:cache_creation_input_tokens] || usage['cache_creation_input_tokens'] || 0).to_i
+              input_tokens:              uval(usage, :input_tokens),
+              output_tokens:             uval(usage, :output_tokens),
+              cache_read_tokens:         uval(usage, :cache_read_input_tokens),
+              cache_write_tokens:        uval(usage, :cache_creation_input_tokens),
+              cache_ephemeral_1h_tokens: uval(cache_creation, :ephemeral_1h_input_tokens),
+              cache_ephemeral_5m_tokens: uval(cache_creation, :ephemeral_5m_input_tokens),
+              cache_deleted_tokens:      uval(usage, :cache_deleted_input_tokens)
             }
+          end
+
+          def uval(hash, key)
+            return 0 unless hash.is_a?(Hash)
+
+            (hash[key] || hash[key.to_s] || 0).to_i
           end
         end
       end

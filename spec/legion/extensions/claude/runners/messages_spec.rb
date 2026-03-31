@@ -233,6 +233,17 @@ RSpec.describe Legion::Extensions::Claude::Runners::Messages do
       expect(result[:result]['input_tokens']).to eq(42)
     end
 
+    it 'includes usage in count_tokens response' do
+      resp = instance_double(Faraday::Response,
+                             body:    { 'input_tokens' => 42, 'usage' => { 'input_tokens' => 42 } },
+                             status:  200,
+                             headers: {})
+      allow(faraday_conn).to receive(:post).with('/v1/messages/count_tokens', anything).and_return(resp)
+
+      result = instance.count_tokens(api_key: api_key, model: model, messages: messages)
+      expect(result[:usage][:input_tokens]).to eq(42)
+    end
+
     it 'includes thinking in count_tokens body when provided' do
       thinking = { type: 'enabled', budget_tokens: 2000 }
       allow(faraday_conn).to receive(:post)
