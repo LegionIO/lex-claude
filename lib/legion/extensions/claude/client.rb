@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'legion/extensions/claude/helpers/client'
+require 'legion/extensions/claude/helpers/models'
 require 'legion/extensions/claude/runners/messages'
 require 'legion/extensions/claude/runners/models'
 require 'legion/extensions/claude/runners/batches'

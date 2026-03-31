@@ -26,6 +26,10 @@ RSpec.describe Legion::Extensions::Claude::Client do
     expect(client).to respond_to(:retrieve)
   end
 
+  it 'responds to create_stream' do
+    expect(client).to respond_to(:create_stream)
+  end
+
   it 'responds to batch runner methods' do
     expect(client).to respond_to(:create_batch)
     expect(client).to respond_to(:list_batches)
