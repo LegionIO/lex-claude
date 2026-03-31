@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'legion/extensions/claude/helpers/client'
+require 'legion/extensions/claude/helpers/response'
 
 module Legion
   module Extensions
@@ -15,12 +16,12 @@ module Legion
             params[:after_id] = after_id if after_id
 
             response = client(api_key: api_key, **).get('/v1/models', params)
-            { result: response.body, status: response.status }
+            Helpers::Response.handle_response(response)
           end
 
           def retrieve(api_key:, model_id:, **)
             response = client(api_key: api_key, **).get("/v1/models/#{model_id}")
-            { result: response.body, status: response.status }
+            Helpers::Response.handle_response(response)
           end
 
           include Legion::Extensions::Helpers::Lex if Legion::Extensions.const_defined?(:Helpers, false) &&

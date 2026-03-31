@@ -24,7 +24,7 @@ RSpec.describe Legion::Extensions::Claude::Runners::Batches do
                       'id'                => 'batch_123',
                       'type'              => 'message_batch',
                       'processing_status' => 'in_progress'
-                    }, status: 200)
+                    }, status: 200, headers: {})
   end
 
   describe '#create_batch' do
@@ -47,7 +47,7 @@ RSpec.describe Legion::Extensions::Claude::Runners::Batches do
       instance_double(Faraday::Response, body: {
                         'data'     => [{ 'id' => 'batch_123' }],
                         'has_more' => false
-                      }, status: 200)
+                      }, status: 200, headers: {})
     end
 
     it 'lists message batches' do
@@ -76,7 +76,7 @@ RSpec.describe Legion::Extensions::Claude::Runners::Batches do
       cancel_response = instance_double(Faraday::Response, body: {
                                           'id'                => 'batch_123',
                                           'processing_status' => 'canceling'
-                                        }, status: 200)
+                                        }, status: 200, headers: {})
       allow(faraday_conn).to receive(:post).with('/v1/messages/batches/batch_123/cancel').and_return(cancel_response)
 
       result = instance.cancel_batch(api_key: api_key, batch_id: 'batch_123')
@@ -90,7 +90,7 @@ RSpec.describe Legion::Extensions::Claude::Runners::Batches do
     it 'retrieves batch results' do
       results_response = instance_double(Faraday::Response, body: [
                                            { 'custom_id' => 'req-1', 'result' => { 'type' => 'succeeded' } }
-                                         ], status: 200)
+                                         ], status: 200, headers: {})
       allow(faraday_conn).to receive(:get).with('/v1/messages/batches/batch_123/results').and_return(results_response)
 
       result = instance.batch_results(api_key: api_key, batch_id: 'batch_123')
