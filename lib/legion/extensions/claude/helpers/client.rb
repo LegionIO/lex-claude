@@ -47,6 +47,19 @@ module Legion
             end
           end
 
+          def streaming_client(api_key:, host: DEFAULT_HOST, betas: nil, **_opts)
+            beta_list = resolve_betas(betas)
+
+            Faraday.new(url: host) do |conn|
+              conn.headers['x-api-key'] = api_key
+              conn.headers['anthropic-version']  = API_VERSION
+              conn.headers['Content-Type']       = 'application/json'
+              conn.headers['Accept']             = 'text/event-stream'
+              conn.headers['anthropic-beta']     = beta_list.join(',') if beta_list.any?
+              conn.adapter Faraday.default_adapter
+            end
+          end
+
           def resolve_betas(betas)
             return [] if betas.nil? || betas.empty?
 

@@ -79,6 +79,65 @@ RSpec.describe Legion::Extensions::Claude::Runners::Messages do
     end
   end
 
+  describe '#create_stream' do
+    let(:stream_body) do
+      <<~SSE
+        event: message_start
+        data: {"type":"message_start","message":{"id":"msg_s1","role":"assistant","content":[],"model":"claude-sonnet-4-20250514","usage":{"input_tokens":5,"output_tokens":0}}}
+
+        event: content_block_start
+        data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}}
+
+        event: content_block_delta
+        data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"Hi!"}}
+
+        event: content_block_stop
+        data: {"type":"content_block_stop","index":0}
+
+        event: message_delta
+        data: {"type":"message_delta","delta":{"stop_reason":"end_turn"},"usage":{"output_tokens":3}}
+
+        event: message_stop
+        data: {"type":"message_stop"}
+
+      SSE
+    end
+
+    let(:stream_response) do
+      instance_double(Faraday::Response, status: 200, body: stream_body, headers: {})
+    end
+
+    before do
+      allow(faraday_conn).to receive(:post).with('/v1/messages', anything).and_return(stream_response)
+    end
+
+    it 'returns assembled text in result' do
+      result = instance.create_stream(api_key: api_key, model: model, messages: messages)
+      expect(result[:result]).to eq('Hi!')
+    end
+
+    it 'returns parsed events array' do
+      result = instance.create_stream(api_key: api_key, model: model, messages: messages)
+      expect(result[:events]).to be_an(Array)
+      expect(result[:events].any? { |e| e[:event] == 'message_start' }).to be true
+    end
+
+    it 'returns usage hash' do
+      result = instance.create_stream(api_key: api_key, model: model, messages: messages)
+      expect(result[:usage][:input_tokens]).to eq(5)
+      expect(result[:usage][:output_tokens]).to eq(3)
+    end
+
+    it 'yields each event when block given' do
+      deltas = []
+      instance.create_stream(api_key: api_key, model: model, messages: messages) do |event|
+        deltas << event if event[:event] == 'content_block_delta'
+      end
+      expect(deltas.length).to eq(1)
+      expect(deltas.first[:data]['delta']['text']).to eq('Hi!')
+    end
+  end
+
   describe 'error handling' do
     let(:error_response) do
       instance_double(Faraday::Response,
