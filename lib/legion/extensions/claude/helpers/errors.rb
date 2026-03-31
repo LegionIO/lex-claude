@@ -49,9 +49,10 @@ module Legion
           module_function
 
           def from_response(status:, body:)
-            error_hash  = body.is_a?(Hash) ? body[:error] : nil
-            error_type  = error_hash&.fetch('type', nil)
-            message     = error_hash&.fetch('message', nil) || body.to_s
+            error_hash  = body.is_a?(Hash) ? (body[:error] || body['error']) : nil # rubocop:disable Legion/Framework/ApiStringKeys
+            error_type  = error_hash.is_a?(Hash) ? (error_hash[:type] || error_hash['type']) : nil
+            message     = error_hash.is_a?(Hash) ? (error_hash[:message] || error_hash['message']) : nil
+            message   ||= body.to_s
 
             klass = TYPE_MAP[error_type] ||
                     STATUS_MAP[status] ||
