@@ -120,5 +120,31 @@ RSpec.describe Legion::Extensions::Claude::Helpers::Response do
       expect(usage[:input_tokens]).to eq(0)
       expect(usage[:output_tokens]).to eq(0)
     end
+
+    it 'parses extended cache fields' do
+      body = {
+        'usage' => {
+          'input_tokens'               => 10,
+          'output_tokens'              => 20,
+          'cache_deleted_input_tokens' => 50,
+          'cache_creation'             => {
+            'ephemeral_1h_input_tokens' => 100,
+            'ephemeral_5m_input_tokens' => 200
+          }
+        }
+      }
+      usage = mod.parse_usage(body)
+      expect(usage[:cache_ephemeral_1h_tokens]).to eq(100)
+      expect(usage[:cache_ephemeral_5m_tokens]).to eq(200)
+      expect(usage[:cache_deleted_tokens]).to eq(50)
+    end
+
+    it 'defaults extended cache fields to zero when absent' do
+      body = { 'usage' => { 'input_tokens' => 5, 'output_tokens' => 3 } }
+      usage = mod.parse_usage(body)
+      expect(usage[:cache_ephemeral_1h_tokens]).to eq(0)
+      expect(usage[:cache_ephemeral_5m_tokens]).to eq(0)
+      expect(usage[:cache_deleted_tokens]).to eq(0)
+    end
   end
 end

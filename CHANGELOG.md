@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.3.1] - 2026-03-31
+
+### Added
+- Extended cache fields in `parse_usage`: `cache_ephemeral_1h_tokens`, `cache_ephemeral_5m_tokens`, `cache_deleted_tokens` from Anthropic's `cache_creation` nested object
+- `count_tokens` now returns `:usage` key with standardized usage hash
+- SSE `collect_usage` returns full 7-field usage hash including cache tokens from stream events
+
+### Changed
+- `parse_usage` refactored to use `uval` helper for dual string/symbol key access
+- SSE `collect_usage` uses `merge_usage` to generically accumulate all usage fields including nested `cache_creation`
+
 ## [0.3.0] - 2026-03-31
 
 ### Added

@@ -61,7 +61,9 @@ module Legion
             resolved_betas << :interleaved_thinking if thinking && !resolved_betas.include?(:interleaved_thinking)
 
             response = client(api_key: api_key, betas: resolved_betas).post('/v1/messages/count_tokens', body)
-            Helpers::Response.handle_response(response)
+            result = Helpers::Response.handle_response(response)
+            result[:usage] = Helpers::Response.parse_usage(response.body) if response.body.is_a?(Hash)
+            result
           end
 
           private

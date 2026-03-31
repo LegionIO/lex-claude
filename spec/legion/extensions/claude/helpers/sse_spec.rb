@@ -79,5 +79,35 @@ RSpec.describe Legion::Extensions::Claude::Helpers::Sse do
       expect(usage[:input_tokens]).to eq(10)
       expect(usage[:output_tokens]).to eq(5)
     end
+
+    it 'includes cache tokens when present in stream' do
+      cached_stream = <<~SSE
+        event: message_start
+        data: {"type":"message_start","message":{"id":"msg_c","usage":{"input_tokens":8,"output_tokens":0,"cache_read_input_tokens":500,"cache_creation_input_tokens":200}}}
+
+        event: message_delta
+        data: {"type":"message_delta","delta":{"stop_reason":"end_turn"},"usage":{"output_tokens":10}}
+
+        event: message_stop
+        data: {"type":"message_stop"}
+
+      SSE
+      events = mod.parse_stream(cached_stream)
+      usage  = mod.collect_usage(events)
+      expect(usage[:input_tokens]).to eq(8)
+      expect(usage[:output_tokens]).to eq(10)
+      expect(usage[:cache_read_tokens]).to eq(500)
+      expect(usage[:cache_write_tokens]).to eq(200)
+    end
+
+    it 'defaults cache fields to zero when absent' do
+      events = mod.parse_stream(sample_stream)
+      usage  = mod.collect_usage(events)
+      expect(usage[:cache_read_tokens]).to eq(0)
+      expect(usage[:cache_write_tokens]).to eq(0)
+      expect(usage[:cache_ephemeral_1h_tokens]).to eq(0)
+      expect(usage[:cache_ephemeral_5m_tokens]).to eq(0)
+      expect(usage[:cache_deleted_tokens]).to eq(0)
+    end
   end
 end
