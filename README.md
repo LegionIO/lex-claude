@@ -191,6 +191,10 @@ result = Legion::Extensions::Claude::Helpers::Retry.with_retry(max_attempts: 3) 
 end
 ```
 
+## Version
+
+0.3.3
+
 ## Dependencies
 
 - `faraday` >= 2.0 — HTTP client
@@ -207,6 +211,10 @@ end
 - `lex-bedrock` — Access Claude models via AWS Bedrock
 - `legion-llm` — High-level LLM interface
 - `extensions-ai/CLAUDE.md` — Architecture patterns shared across all AI extensions
+
+## Version
+
+0.3.3
 
 ## License
 
