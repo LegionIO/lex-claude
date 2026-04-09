@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+- Credential-only identity module for Phase 8 Broker integration (`Identity` module with `provide_token`)
+
 ## [0.3.2] - 2026-03-31
 
 ### Added

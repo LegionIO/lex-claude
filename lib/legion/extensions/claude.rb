@@ -11,6 +11,7 @@ require 'legion/extensions/claude/helpers/models'
 require 'legion/extensions/claude/runners/messages'
 require 'legion/extensions/claude/runners/models'
 require 'legion/extensions/claude/runners/batches'
+require 'legion/extensions/claude/identity'
 
 module Legion
   module Extensions
