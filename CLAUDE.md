@@ -6,35 +6,48 @@
 
 ## Purpose
 
-Legion Extension that connects LegionIO to the Claude Anthropic API. Provides runners for message creation, token counting, model listing, and asynchronous batch processing.
+Legion Extension that connects LegionIO to the Claude Anthropic API. Provides runners for message creation (streaming and non-streaming), token counting, model listing, and asynchronous batch processing. Full support for prompt caching, extended thinking, structured output, web search, effort control, fast mode, and context management betas.
 
 **GitHub**: https://github.com/LegionIO/lex-claude
 **License**: MIT
-**Version**: 0.1.2
-**Specs**: 18 examples
+**Version**: 0.3.3
+**Specs**: 134 examples (12 spec files)
 
 ## Architecture
 
 ```
 Legion::Extensions::Claude
 ├── Runners/
-│   ├── Messages           # create(api_key:, model:, messages:, ...), count_tokens(api_key:, model:, messages:, ...)
-│   ├── Models             # list(api_key:, ...), retrieve(api_key:, model_id:, ...)
+│   ├── Messages           # create, create_stream, count_tokens
+│   ├── Models             # list, retrieve
 │   └── Batches            # create_batch, list_batches, retrieve_batch, cancel_batch, batch_results
 ├── Helpers/
-│   └── Client             # Faraday-based Anthropic API client (module, factory method)
+│   ├── Client             # Faraday-based Anthropic API client (module + streaming_client factory)
+│   ├── Errors             # structured exception hierarchy (ApiError, RateLimitError, AuthenticationError, etc.)
+│   ├── Models             # model symbol alias resolution (Helpers::Models.resolve)
+│   ├── Response           # response handling + usage parsing (handle_response, parse_usage)
+│   ├── Retry              # Helpers::Retry.with_retry (configurable max_attempts)
+│   ├── Sse                # SSE stream parser (parse_stream, collect_text, collect_usage)
+│   └── Tools              # tool descriptor builders (web_search)
 └── Client                 # Standalone client class (includes all runners, holds @config)
 ```
 
-`Helpers::Client` is a **module** with a `client(api_key:, ...)` factory method. It sets `x-api-key` and `anthropic-version` headers. The `API_VERSION` constant is `'2023-06-01'` and `DEFAULT_HOST` is `'https://api.anthropic.com'`. All runner modules `extend` it.
+`Helpers::Client` is a **module** with two factory methods:
+- `client(api_key:, betas: nil, ...)` — standard Faraday connection, sets `x-api-key` and `anthropic-version` headers, encodes betas as `anthropic-beta` header.
+- `streaming_client(api_key:, betas: nil)` — same connection but configured for streaming responses.
 
-`Client` (class) provides a standalone instantiable wrapper. It `include`s all runner modules and holds a persistent `@config` hash. Its private `client(**override_opts)` merges config with any per-call overrides and delegates to `Helpers::Client.client(...)`.
+`API_VERSION = '2023-06-01'`. `DEFAULT_HOST = 'https://api.anthropic.com'`.
+
+`Client` (class) provides a standalone instantiable wrapper. It `include`s all runner modules and holds a persistent `@config` hash. Its private `client(**override_opts)` merges config with per-call overrides and delegates to `Helpers::Client.client(...)`.
 
 ## Key Design Decisions
 
-- `Helpers::Client` uses `module_function`, making `client(...)` callable as both a module-level method and as an instance method when mixed in. Runners use `extend Helpers::Client` to get `client(...)` as a module-level method.
-- `Client` class uses `include` (not `extend`) so runner methods become instance methods on the client object.
-- The Batches runner uses JSON-only payloads — no multipart dependency.
+- `Messages#create` auto-resolves beta headers based on opts: `cache_scope: :global` adds `:prompt_caching_scope`, `thinking:` adds `:interleaved_thinking`, `output_config.format` adds `:structured_outputs`, `output_config.effort` adds `:effort`, `fast_mode: true` adds `:fast_mode`, `context_management:` adds `:context_management`.
+- `Messages#create_stream` uses `Helpers::Sse.parse_stream` for SSE event parsing. Returns `{ result: accumulated_text, events:, usage:, status: 200 }`.
+- `Messages#count_tokens` posts to `/v1/messages/count_tokens`.
+- `Batches` runner uses JSON-only payloads — no multipart dependency.
+- `Helpers::Errors.from_response` builds typed exceptions from HTTP status codes.
+- `Helpers::Retry.with_retry` retries on rate limit and server errors with exponential backoff.
 - `include Legion::Extensions::Helpers::Lex` is guarded: only included when `lex-lex` is loaded.
 
 ## Dependencies
@@ -43,15 +56,17 @@ Legion::Extensions::Claude
 |-----|---------|
 | `faraday` >= 2.0 | HTTP client for Anthropic API |
 | `multi_json` | JSON parser abstraction |
+| `legion-cache`, `legion-crypt`, `legion-data`, `legion-json`, `legion-logging`, `legion-settings`, `legion-transport` | LegionIO core |
 
 ## Testing
 
 ```bash
 bundle install
-bundle exec rspec        # 18 examples
+bundle exec rspec        # 134 examples
 bundle exec rubocop
 ```
 
 ---
 
 **Maintained By**: Matthew Iverson (@Esity)
+**Last Updated**: 2026-04-06
